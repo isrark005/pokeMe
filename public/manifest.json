@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "PokeMe",
+  "version": "1.0.0",
+  "description": "A Chrome extension that sends reminder notifications for saved content.",
+  "action": {
+    "default_popup": "index.html"
+  },
+  "permissions": [
+    "notifications",     
+    "storage",          
+    "alarms",
+    "activeTab"            
+  ],
+  "background": {
+    "service_worker": "background.js" 
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "host_permissions": [
+    "<all_urls>"
+  ]
+}
