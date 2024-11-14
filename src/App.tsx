@@ -12,7 +12,7 @@ function App() {
   }
   return (
     <>
-    <main className='w-[380px] max-h-[650px]'>    
+    <main className='w-[380px] max-h-[650px] m-auto'>    
     <Header onListBtnClickCallBack={onBtnClick}/>
     <SetReminderForm/>
    {showList && <ReminderList />}

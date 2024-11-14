@@ -5,6 +5,7 @@ export default function SetReminderForm() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [title, setTitle] = useState("");
+  const urlParams = new URLSearchParams(window.location.search);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -22,15 +23,22 @@ export default function SetReminderForm() {
   };
 
   useEffect(() => {
-    (async () => {
-      const [tab] = await chrome.tabs.query({ active: true });
-      if (tab) {
-        setTitle(tab.title || "");
-        setLink(tab.url || "");
-      }
-    })();
+    const titleParam = urlParams.get("title");
+    const linkParam = urlParams.get("link");
+    if (titleParam && linkParam) {
+      setTitle(titleParam);
+      setLink(linkParam);
+    } else
+      (async () => {
+        const [tab] = await chrome.tabs.query({ active: true });
+        if (tab) {
+          setTitle(tab.title || "");
+          setLink(tab.url || "");
+        }
+      })();
   }, []);
 
+  
   return (
     <>
       <div className="form-heading px-4">
