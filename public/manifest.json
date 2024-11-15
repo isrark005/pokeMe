@@ -11,6 +11,12 @@
     "storage",          
     "alarms",
     "activeTab"            
+  ], 
+  "content_scripts": [
+    {
+      "matches": ["*://www.youtube.com/*"], 
+      "js": ["content.js"]
+    }
   ],
   "background": {
     "service_worker": "background.js" 

@@ -37,16 +37,34 @@ chrome.notifications.onClicked.addListener((notificationId) => {
   });
 });
 
-chrome.notifications.onButtonClicked.addListener((notificationId, buttonIndex)=> {
+chrome.notifications.onButtonClicked.addListener((notificationId, buttonIndex) => {
   chrome.storage.local.get(notificationId, (data) => {
     const reminderData = data[notificationId];
-    if(buttonIndex === 0){
+    if (buttonIndex === 0) {
       if (reminderData && reminderData.link) {
         chrome.tabs.create({ url: reminderData.link });
       }
-    }else if(buttonIndex === 1){
-      const extensionUrl = chrome.runtime.getURL(`index.html?title=${reminderData.title}&link=${reminderData.link}`);
-      chrome.tabs.create({ url: extensionUrl }); 
+    } else if (buttonIndex === 1) {
+      chrome.tabs.create({
+        url: chrome.runtime.getURL('index.html') 
+      });
+      chrome.storage.local.set({
+        reminderTitle: reminderData.title,
+        reminderLink: reminderData.link
+      });
     }
   });
-})
+});
+
+
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'ADD_REMINDER') {
+    const { title, link } = message;
+
+  
+    chrome.storage.local.set({ reminderTitle: title, reminderLink: link }, () => {
+      chrome.action.openPopup(); 
+    });
+  }
+});
