@@ -1,7 +1,7 @@
 import { useState, FormEvent, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 export default function SetReminderForm() {
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toISOString().split("T")[0];
   const [link, setLink] = useState("");
   const [date, setDate] = useState(today);
   const [time, setTime] = useState("");
@@ -25,16 +25,17 @@ export default function SetReminderForm() {
   };
 
   useEffect(() => {
-    chrome.storage.local.get(['reminderTitle', 'reminderLink'], (data) => {
-      if(data.reminderTitle)
-      setTitle(data.reminderTitle || '');
-      setLink(data.reminderLink || '');
-      chrome.storage.local.remove(['reminderTitle', 'reminderLink']);
+    chrome.storage.local.get(["reminderTitle", "reminderLink"], (data) => {
+      if (data.reminderTitle) {
+        setTitle(data.reminderTitle || "")
+        setLink(data.reminderLink || "")
+        chrome.storage.local.remove(["reminderTitle", "reminderLink"])
+      }
     });
-  
+
     return () => {
-      setTitle('');
-      setLink('');
+      setTitle("");
+      setLink("");
     };
   }, []);
 
@@ -49,14 +50,11 @@ export default function SetReminderForm() {
         const [tab] = await chrome.tabs.query({ active: true });
         if (tab) {
           setTitle(tab.title || "");
-          // TODO: URL not filling in
+
           setLink(tab.url || "");
         }
       })();
   }, []);
-
-
-  
 
   return (
     <>
