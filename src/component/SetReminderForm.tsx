@@ -1,22 +1,43 @@
 import { useState, FormEvent, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
-export default function SetReminderForm() {
+import { ReminderT } from "./ReminderList";
+
+interface SetReminderFormProps {
+  foundItem: ReminderT | null;
+}
+
+export default function SetReminderForm({ foundItem }: SetReminderFormProps) {
   const today = new Date().toISOString().split("T")[0];
-  const [link, setLink] = useState("");
-  const [date, setDate] = useState(today);
+  const foundItemDate =
+    foundItem && new Date(foundItem?.reminderDate).toISOString().split("T")[0];
+  const [link, setLink] = useState(foundItem?.link || "");
+  const [date, setDate] = useState(foundItemDate || today);
   const [time, setTime] = useState("");
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(foundItem?.title || "");
   const urlParams = new URLSearchParams(window.location.search);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (foundItem) {
+      chrome.storage.local.remove(foundItem.id);
+      chrome.alarms.clear(foundItem.id);
+    }
+
     const reminderDate = new Date(`${date}T${time}`);
     const timeDifference = reminderDate.getTime() - Date.now();
-    console.log(reminderDate)
+
     const uniueId = uuidv4();
     if (timeDifference > 0) {
       chrome.alarms.create(uniueId, { when: Date.now() + timeDifference });
-      const reqBody = { [uniueId]: { link, title, id: uniueId, reminderDate: reminderDate.toISOString() } }
+      const reqBody = {
+        [uniueId]: {
+          link,
+          title,
+          id: uniueId,
+          reminderDate: reminderDate.toISOString(),
+        },
+      };
       console.log(reqBody);
       chrome.storage.local.set(reqBody);
     }
@@ -27,11 +48,18 @@ export default function SetReminderForm() {
   };
 
   useEffect(() => {
+    if (foundItem) {
+      setLink(foundItem.link);
+      foundItemDate && setDate(foundItemDate);
+      setTitle(foundItem.title);
+    }
+  }, [foundItem]);
+  useEffect(() => {
     chrome.storage.local?.get(["reminderTitle", "reminderLink"], (data) => {
       if (data.reminderTitle) {
-        setTitle(data.reminderTitle || "")
-        setLink(data.reminderLink || "")
-        chrome.storage.local.remove(["reminderTitle", "reminderLink"])
+        setTitle(data.reminderTitle || "");
+        setLink(data.reminderLink || "");
+        chrome.storage.local.remove(["reminderTitle", "reminderLink"]);
       }
     });
 

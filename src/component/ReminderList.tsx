@@ -4,19 +4,37 @@ import { ExternalLink } from "../assets/icons/ExternalLink";
 import { ClockIcon } from "../assets/icons/ClockIcon";
 import { Trashicon } from "../assets/icons/Trashicon";
 
-export function ReminderList() {
+export type ReminderT = {
+  title: string,
+  id: string,
+  link: string,
+  reminderDate: string  
+}
+
+interface ReminderListProps {
+  handleFoundItemcallBack: (item: ReminderT)=> void
+}
+
+export function ReminderList({handleFoundItemcallBack}: ReminderListProps) {
   const [reminderList, setReminderList] = useState<any>(null);
-  const reminderListObj = reminderList && Object.values(reminderList);
+  const reminderListObj: ReminderT[] = reminderList && Object.values(reminderList);
   useEffect(() => {
     chrome.storage.local.get(null, (data) => setReminderList(data));
   }, []);
 
-  console.log(reminderList);
+  const openLink = (link: string)=> {
+    if(link)
+      chrome.tabs.create({ url: link})
+  }
   const handleChangeTime = (id: string) => {
-    console.log("handle the time change", id);
+    const foundItem = reminderList[id];
+    if(foundItem){
+      handleFoundItemcallBack(foundItem)
+    }
   };
   const handleDelete = (id: string) => {
-    console.log("handle delete", id);
+    chrome.storage.local.remove(id);
+    chrome.alarms.clear(id);
   };
   console.log(reminderListObj);
   
@@ -32,9 +50,9 @@ export function ReminderList() {
 
   
   return (
-    <Container className="bg-gray-100">
+    <Container className="bg-gray-100 py-4">
       <>      
-      <h2 className="mt-6 mb-3 text-[24px] font-bold text-secondary">
+      <h2 className="mb-3 text-[24px] font-bold text-secondary">
           All Reminders
         </h2>
       <ul className="space-y-3">
@@ -47,11 +65,11 @@ export function ReminderList() {
               <div className="py-3 px-4 flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div>
-                    <h3 className="font-semibold text-lg text-gray-800">
+                    <h3 className="font-semibold text-lg text-gray-800 line-clamp-1">
                       {reminder.title}
                     </h3>
                     <div className="flex items-center text-sm text-gray-600 mt-1">
-                      <ClockIcon className="mr-1 w-2 h-2" />
+                      <ClockIcon className="mr-1 size-4" />
                       <span>{formatDate(reminder.reminderDate)}</span>
                       <span className="mx-2">•</span>
                       <span>{formatTime(reminder.reminderDate)}</span>
@@ -59,13 +77,13 @@ export function ReminderList() {
                   </div>
                 </div>
                 <div className="flex space-x-2">
-                  <a
-                    href={reminder.link}
+                  <button
+                    onClick={()=> openLink(reminder.link)}
                     className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
                     aria-label="Open link"
                   >
                     <ExternalLink className="w-5 h-5" />
-                  </a>
+                  </button>
                   <button
                     onClick={() => handleChangeTime(reminder.id)}
                     className="p-2 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 transition-colors"
