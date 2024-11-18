@@ -12,11 +12,13 @@ export default function SetReminderForm() {
     e.preventDefault();
     const reminderDate = new Date(`${date}T${time}`);
     const timeDifference = reminderDate.getTime() - Date.now();
-
+    console.log(reminderDate)
     const uniueId = uuidv4();
     if (timeDifference > 0) {
       chrome.alarms.create(uniueId, { when: Date.now() + timeDifference });
-      chrome.storage.local.set({ [uniueId]: { link, title } });
+      const reqBody = { [uniueId]: { link, title, id: uniueId, reminderDate: reminderDate.toISOString() } }
+      console.log(reqBody);
+      chrome.storage.local.set(reqBody);
     }
     setLink("");
     setDate("");
@@ -25,7 +27,7 @@ export default function SetReminderForm() {
   };
 
   useEffect(() => {
-    chrome.storage.local.get(["reminderTitle", "reminderLink"], (data) => {
+    chrome.storage.local?.get(["reminderTitle", "reminderLink"], (data) => {
       if (data.reminderTitle) {
         setTitle(data.reminderTitle || "")
         setLink(data.reminderLink || "")
