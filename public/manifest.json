@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "PokeMe",
   "version": "1.0.0",
-  "description": "A Chrome extension that sends reminder notifications for saved content.",
+  "description": "Set and receive reminders for saved YouTube videos and links through in-browser notifications.",
   "action": {
     "default_popup": "index.html"
   },
@@ -12,6 +12,12 @@
     "alarms",
     "activeTab"            
   ], 
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
   "content_scripts": [
     {
       "matches": ["*://www.youtube.com/*"], 
@@ -22,9 +28,10 @@
     "service_worker": "background.js" 
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'"
-  },
+  "extension_pages": "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; object-src 'self'"
+}
+,
   "host_permissions": [
-    "<all_urls>"
+    "*://www.youtube.com/*"
   ]
 }

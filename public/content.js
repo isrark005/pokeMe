@@ -18,7 +18,7 @@ function addButtonToVideoCards(selector, buttonText, className) {
       button.style.cursor = 'pointer';
       button.style.zIndex = '1000';
   
-      const thumbnailContainer = item.querySelector('#thumbnail');
+      const thumbnailContainer = item.querySelector('ytd-thumbnail');
       if (thumbnailContainer) {
         thumbnailContainer.style.position = 'relative';
         thumbnailContainer.appendChild(button);
@@ -39,7 +39,7 @@ function addButtonToVideoCards(selector, buttonText, className) {
   }
   
   function addButtonsToAllVideoCards() {
-    addButtonToVideoCards('ytd-rich-item-renderer', 'Poke Me', 'pokeMeButton');
+    addButtonToVideoCards('ytd-rich-item-renderer', 'PokeMe', 'pokeMeButton');
     addButtonToVideoCards('ytd-compact-video-renderer', '🕒', 'pokeMeClockButton');
     addButtonToVideoCards('ytd-video-renderer', 'Set Reminder', 'pokeMeButton');
     addButtonToVideoCards('ytd-grid-video-renderer', 'Set Reminder', 'pokeMeButton');

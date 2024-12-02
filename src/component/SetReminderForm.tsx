@@ -7,14 +7,15 @@ interface SetReminderFormProps {
 }
 
 export default function SetReminderForm({ foundItem }: SetReminderFormProps) {
+  
   const today = new Date().toISOString().split("T")[0];
   const foundItemDate =
     foundItem && new Date(foundItem?.reminderDate).toISOString().split("T")[0];
-  const [link, setLink] = useState(foundItem?.link || "");
-  const [date, setDate] = useState(foundItemDate || today);
+  const [link, setLink] = useState("");
+  const [date, setDate] = useState(today);
   const [time, setTime] = useState("");
-  const [title, setTitle] = useState(foundItem?.title || "");
-  const urlParams = new URLSearchParams(window.location.search);
+  const [title, setTitle] = useState("");
+  const [reminderToast, setReminderToast] = useState(false);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -27,33 +28,44 @@ export default function SetReminderForm({ foundItem }: SetReminderFormProps) {
     const reminderDate = new Date(`${date}T${time}`);
     const timeDifference = reminderDate.getTime() - Date.now();
 
-    const uniueId = uuidv4();
+    const uniqueId = uuidv4();
     if (timeDifference > 0) {
-      chrome.alarms.create(uniueId, { when: Date.now() + timeDifference });
+      chrome.alarms.create(uniqueId, { when: Date.now() + timeDifference });
       const reqBody = {
-        [uniueId]: {
+        [uniqueId]: {
           link,
           title,
-          id: uniueId,
+          id: uniqueId,
           reminderDate: reminderDate.toISOString(),
         },
       };
       console.log(reqBody);
       chrome.storage.local.set(reqBody);
+
+     
+      setReminderToast(true);
+
+      setTimeout(() => {
+        setReminderToast(false);
+      }, 4000);
     }
+
+    // Clear form fields
     setLink("");
     setDate("");
     setTime("");
     setTitle("");
   };
 
-  useEffect(() => {
-    if (foundItem) {
-      setLink(foundItem.link);
-      foundItemDate && setDate(foundItemDate);
-      setTitle(foundItem.title);
-    }
-  }, [foundItem]);
+  // useEffect(() => {
+  //   if (foundItem) {
+  //     console.log(foundItem)
+  //     setLink(foundItem.link);
+  //     foundItemDate && setDate(foundItemDate);
+  //     setTitle(foundItem.title);
+  //   }
+  // }, [foundItem]);
+
   useEffect(() => {
     chrome.storage.local?.get(["reminderTitle", "reminderLink"], (data) => {
       if (data.reminderTitle) {
@@ -70,11 +82,10 @@ export default function SetReminderForm({ foundItem }: SetReminderFormProps) {
   }, []);
 
   useEffect(() => {
-    const titleParam = urlParams.get("title");
-    const linkParam = urlParams.get("link");
-    if (titleParam && linkParam) {
-      setTitle(titleParam);
-      setLink(linkParam);
+    if (foundItem) {
+      setTitle(foundItem.title);
+      setLink(foundItem.link);
+      foundItemDate && setDate(foundItemDate);
     } else
       (async () => {
         const [tab] = await chrome.tabs.query({ active: true });
@@ -84,13 +95,20 @@ export default function SetReminderForm({ foundItem }: SetReminderFormProps) {
           setLink(tab.url || "");
         }
       })();
-  }, []);
+  }, [foundItem]);
+  console.log(foundItem);
 
   return (
     <>
-      <div className="form-heading px-4">
+      <div className="form-heading px-4 relative">
+        {reminderToast && (
+          <div className="absolute top-0.5 inset-x-2 bg-green-100 text-green-700 rounded-lg px-4 py-3 shadow-md">
+            Reminder added!
+          </div>
+        )}
+
         <h2 className="mt-6 mb-3 text-[38px] font-bold text-secondary">
-          Hold My Spot!
+          {foundItem ? "Edit Reminder" : "Hold My Spot!"}
         </h2>
       </div>
       <form
